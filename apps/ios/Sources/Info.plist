@@ -33,6 +33,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>OpenClaw can capture photos or short video clips when requested via the gateway.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>OpenClaw uses Face ID to secure access to the app.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>OpenClaw discovers and connects to your OpenClaw gateway on the local network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

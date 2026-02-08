@@ -16,6 +16,7 @@ struct SettingsTab: View {
     @Environment(NodeAppModel.self) private var appModel: NodeAppModel
     @Environment(VoiceWakeManager.self) private var voiceWake: VoiceWakeManager
     @Environment(GatewayConnectionController.self) private var gatewayController: GatewayConnectionController
+    @Environment(BiometricAuthManager.self) private var biometricAuthManager: BiometricAuthManager
     @Environment(\.dismiss) private var dismiss
     @AppStorage("node.displayName") private var displayName: String = "iOS Node"
     @AppStorage("node.instanceId") private var instanceId: String = UUID().uuidString
@@ -62,6 +63,13 @@ struct SettingsTab: View {
                     LabeledContent("Platform", value: self.platformString())
                     LabeledContent("Version", value: self.appVersion())
                     LabeledContent("Model", value: self.modelIdentifier())
+                }
+
+                Section("Security") {
+                    Toggle(self.biometricAuthManager.biometricDisplayName, isOn: self.$biometricAuthManager.isBiometricEnabled)
+                    Text("Require \(self.biometricAuthManager.biometricDisplayName) or passcode to unlock the app.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Gateway") {
@@ -114,6 +122,16 @@ struct SettingsTab: View {
                     }
 
                     DisclosureGroup("Advanced") {
+                        NavigationLink {
+                            QRScannerView()
+                        } label: {
+                            Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                        }
+
+                        Text("Scan a QR code from your gateway to auto-configure connection.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+
                         Toggle("Use Manual Gateway", isOn: self.$manualGatewayEnabled)
 
                         TextField("Host", text: self.$manualGatewayHost)
