@@ -26,6 +26,7 @@ The agent team successfully delivered:
 - Installs OpenClaw gateway
 - Generates secure token
 - Creates QR code for iOS app
+- **Restricts channels to Mobile + Slack only**
 - Starts gateway automatically
 
 ---
@@ -339,8 +340,15 @@ bash scripts/install-enterprise.sh
 - ❌ No certificate pinning - basic TLS only
 - ❌ No permission approval workflows - direct execution
 - ❌ No multi-instance management - connects to one gateway
-- ❌ No Android app - iOS only
 - ❌ Manual gateway config needed in script - no automatic discovery in QR
+
+### 📱 Available Channels
+The install script restricts channels to:
+- ✅ **Mobile App** (iOS + Android via gateway WebSocket)
+- ✅ **Slack** (optional, for fallback communication)
+- ❌ WhatsApp, Telegram, Discord, Signal, iMessage - **disabled by default**
+
+To enable all channels, run: `openclaw config delete plugins.allow`
 
 ---
 

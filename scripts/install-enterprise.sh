@@ -122,6 +122,14 @@ init_config() {
     else
         log_warn "Config may already exist"
     fi
+
+    # Restrict channels to mobile app + Slack only
+    log_info "Configuring channel restrictions..."
+    if openclaw config set 'plugins.allow=["slack"]' 2>/dev/null; then
+        log_success "Channels restricted (mobile + Slack only)"
+    else
+        log_warn "Failed to configure channel restrictions"
+    fi
 }
 
 # Generate and store gateway token
