@@ -105,6 +105,12 @@ dependencies {
   implementation("androidx.exifinterface:exifinterface:1.4.2")
   implementation("com.squareup.okhttp3:okhttp:5.3.2")
 
+  // Biometric authentication
+  implementation("androidx.biometric:biometric:1.2.0-alpha05")
+
+  // QR code scanning
+  implementation("com.google.mlkit:barcode-scanning:17.2.0")
+
   // CameraX (for node.invoke camera.* parity)
   implementation("androidx.camera:camera-core:1.5.2")
   implementation("androidx.camera:camera-camera2:1.5.2")

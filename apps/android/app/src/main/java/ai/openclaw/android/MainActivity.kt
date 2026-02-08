@@ -18,14 +18,21 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import ai.openclaw.android.auth.BiometricAuthManager
+import ai.openclaw.android.auth.BiometricLockScreen
 import ai.openclaw.android.ui.RootScreen
 import ai.openclaw.android.ui.OpenClawTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
   private val viewModel: MainViewModel by viewModels()
   private lateinit var permissionRequester: PermissionRequester
   private lateinit var screenCaptureRequester: ScreenCaptureRequester
+  private lateinit var biometricAuthManager: BiometricAuthManager
+  private var showBiometricLock by mutableStateOf(false)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -37,6 +44,7 @@ class MainActivity : ComponentActivity() {
     NodeForegroundService.start(this)
     permissionRequester = PermissionRequester(this)
     screenCaptureRequester = ScreenCaptureRequester(this)
+    biometricAuthManager = BiometricAuthManager(this)
     viewModel.camera.attachLifecycleOwner(this)
     viewModel.camera.attachPermissionRequester(permissionRequester)
     viewModel.sms.attachPermissionRequester(permissionRequester)
@@ -58,7 +66,16 @@ class MainActivity : ComponentActivity() {
     setContent {
       OpenClawTheme {
         Surface(modifier = Modifier) {
-          RootScreen(viewModel = viewModel)
+          if (showBiometricLock) {
+            BiometricLockScreen(
+              authManager = biometricAuthManager,
+              onAuthenticated = {
+                showBiometricLock = false
+              },
+            )
+          } else {
+            RootScreen(viewModel = viewModel)
+          }
         }
       }
     }
@@ -67,6 +84,10 @@ class MainActivity : ComponentActivity() {
   override fun onResume() {
     super.onResume()
     applyImmersiveMode()
+    if (biometricAuthManager.isBiometricEnabled && !biometricAuthManager.isAuthenticated.value) {
+      biometricAuthManager.resetAuthentication()
+      showBiometricLock = true
+    }
   }
 
   override fun onWindowFocusChanged(hasFocus: Boolean) {

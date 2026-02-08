@@ -33,6 +33,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -64,10 +65,14 @@ import ai.openclaw.android.MainViewModel
 import ai.openclaw.android.NodeForegroundService
 import ai.openclaw.android.VoiceWakeMode
 import ai.openclaw.android.WakeWords
+import ai.openclaw.android.auth.BiometricAuthManager
+import ai.openclaw.android.qr.QRScannerScreen
 
 @Composable
 fun SettingsSheet(viewModel: MainViewModel) {
   val context = LocalContext.current
+  val biometricAuthManager = remember { BiometricAuthManager(context) }
+  var showQRScanner by remember { mutableStateOf(false) }
   val instanceId by viewModel.instanceId.collectAsState()
   val displayName by viewModel.displayName.collectAsState()
   val cameraEnabled by viewModel.cameraEnabled.collectAsState()
@@ -279,6 +284,51 @@ fun SettingsSheet(viewModel: MainViewModel) {
     item { Text("Instance ID: $instanceId", color = MaterialTheme.colorScheme.onSurfaceVariant) }
     item { Text("Device: $deviceModel", color = MaterialTheme.colorScheme.onSurfaceVariant) }
     item { Text("Version: $appVersion", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+
+    item { HorizontalDivider() }
+
+    // Security
+    item { Text("Security", style = MaterialTheme.typography.titleSmall) }
+    item {
+      val biometricAvailable = biometricAuthManager.biometricType == BiometricAuthManager.BiometricType.Available
+      ListItem(
+        headlineContent = { Text("Biometric Lock") },
+        supportingContent = {
+          Text(
+            if (biometricAvailable) {
+              "Require ${biometricAuthManager.biometricDisplayName} on app launch"
+            } else {
+              "Biometric authentication not available"
+            },
+          )
+        },
+        trailingContent = {
+          Switch(
+            checked = biometricAuthManager.isBiometricEnabled,
+            onCheckedChange = { enabled ->
+              biometricAuthManager.isBiometricEnabled = enabled
+            },
+            enabled = biometricAvailable,
+          )
+        },
+      )
+    }
+    item {
+      Button(
+        onClick = { showQRScanner = true },
+        modifier = Modifier.fillMaxWidth(),
+      ) {
+        Icon(
+          imageVector = Icons.Default.QrCodeScanner,
+          contentDescription = null,
+          modifier = Modifier.size(20.dp),
+        )
+        Text(
+          text = "Scan Gateway QR Code",
+          modifier = Modifier.padding(start = 8.dp),
+        )
+      }
+    }
 
     item { HorizontalDivider() }
 
@@ -673,6 +723,12 @@ fun SettingsSheet(viewModel: MainViewModel) {
     }
 
     item { Spacer(modifier = Modifier.height(20.dp)) }
+  }
+
+  if (showQRScanner) {
+    QRScannerScreen(
+      onDismiss = { showQRScanner = false },
+    )
   }
 }
 
